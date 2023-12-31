@@ -1,1 +1,3 @@
-# MindNetwork
+# mindnetwork
+
+A new Flutter project.
