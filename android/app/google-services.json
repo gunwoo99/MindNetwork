@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "469840950956",
+    "project_id": "mind-95221",
+    "storage_bucket": "mind-95221.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:469840950956:android:24060588b343d267d89109",
+        "android_client_info": {
+          "package_name": "com.example.mindnetwork"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeXc4ApQ9Bukd_abbPX7B5hoWYUFmrrh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
