@@ -11,6 +11,7 @@ final networkViewmodelProvider =
 
 class NetworkViewmodel extends ChangeNotifier {
   User me = User();
+  Network selectedNetwork = Network();
   List<Network> networks = [];
   Offset center = const Offset(0, 0);
   List<Edge> edges = [];
@@ -19,6 +20,38 @@ class NetworkViewmodel extends ChangeNotifier {
   List<bool> isNodeSelected = [];
   List<bool> isClicked = [];
   List<bool> isDetailed = [];
+
+  Future<void> loadNetworkData(String networkId, int index) async {
+    selectedNetwork = networks[index];
+    nodes = await getNodes(networkId);
+    edges = await getEdges(networkId);
+    for (Node node in nodes) {
+      nodeIds[node.id] = node;
+    }
+    isNodeSelected = List.generate(nodes.length, (index) => false);
+    isClicked = List.generate(nodes.length, (index) => false);
+    isDetailed = List.generate(nodes.length, (index) => false);
+    notifyListeners();
+    return;
+  }
+
+  Future<void> updateNetwork() async {
+    for (Node node in nodes) {
+      await updateNode(selectedNetwork.networkId, node);
+    }
+    for (Edge edge in edges) {
+      await updateEdge(selectedNetwork.networkId, edge);
+    }
+    notifyListeners();
+    return;
+  }
+
+  Future<void> updateNetworkName(String networkName, int index) async {
+    networks[index].networkName = networkName;
+    await FireService().updateDoc('Network', networks[index].networkId, networks[index].toJson());
+    notifyListeners();
+    return;
+  }
 
   void getUserData(String userId) async {
     me = await getUser(userId);
@@ -100,7 +133,7 @@ class NetworkViewmodel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addNodeasChild(double left, double top, int index) {
+  void addNodeasChild(double left, double top, int index) async {
     // 새로운 노드 생성
     Node node = Node();
     node.left = left;
@@ -126,6 +159,8 @@ class NetworkViewmodel extends ChangeNotifier {
     isNodeSelected.add(false);
     isClicked.add(false);
     isDetailed.add(false);
+    await createNode(selectedNetwork.networkId, node);
+    await createEdge(selectedNetwork.networkId, edge);
     notifyListeners();
   }
 
@@ -138,6 +173,7 @@ class NetworkViewmodel extends ChangeNotifier {
     isNodeSelected.add(false);
     isClicked.add(false);
     isDetailed.add(false);
+    createNode(selectedNetwork.networkId, node);
     notifyListeners();
   }
 

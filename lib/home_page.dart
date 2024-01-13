@@ -21,53 +21,23 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     final provider = ref.watch(networkViewmodelProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text("HomePage"),
       ),
-      body: Stack(
-        children: [
-          Container(
-            height: size.height,
-            width: size.width,
-            color: Colors.blue[200],
-          ),
-          Positioned(
-            child: SizedBox(
-              width: size.width,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    provider.networks.length,
-                    ((index) {
-                      return NetworkListTile(index: index);
-                    }),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 30,
-            bottom: 30,
-            child: GestureDetector(
-              onTap: () => provider.addNetwork(),
-              child: ClipOval(
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  color: Colors.blue[600],
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
+      body: ListView.builder(
+        itemCount: provider.networks.length,
+        itemBuilder: (context, index) {
+          return NetworkListTile(index: index);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => provider.addNetwork(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -108,14 +78,35 @@ class _NetworkListTileState extends ConsumerState<NetworkListTile> {
           Positioned(
             top: 10,
             left: 10,
-            child:
-                Text("Network Name : ${provider.networks[index].networkName}"),
+            child: Text(
+              "Network Name : ${provider.networks[index].networkName}",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 5,
+            right: 195,
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      EditNetworkNamePopUp(index: index),
+                );
+              },
+              child: const Text('EditName'),
+            ),
           ),
           Positioned(
             right: 95,
             bottom: 5,
             child: ElevatedButton(
               onPressed: () {
+                provider.loadNetworkData(
+                    provider.networks[index].networkId, index);
                 context.go('/NetworkPage');
               },
               child: const Text('Network'),
@@ -138,6 +129,56 @@ class _NetworkListTileState extends ConsumerState<NetworkListTile> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class EditNetworkNamePopUp extends ConsumerStatefulWidget {
+  const EditNetworkNamePopUp({super.key, required this.index});
+  final int index;
+
+  @override
+  ConsumerState<EditNetworkNamePopUp> createState() =>
+      _EditNetworkNamePopUpState();
+}
+
+class _EditNetworkNamePopUpState extends ConsumerState<EditNetworkNamePopUp> {
+  late String edittedNetworkName;
+  @override
+  void initState() {
+    super.initState();
+    final provider = ref.read(networkViewmodelProvider);
+    edittedNetworkName = provider.networks[widget.index].networkName;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = ref.watch(networkViewmodelProvider);
+    return AlertDialog(
+      title: const Text('Edit Network Name'),
+      content: TextField(
+        onChanged: (value) {
+          edittedNetworkName = value;
+        },
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            context.pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await provider
+                .updateNetworkName(edittedNetworkName, widget.index)
+                .then((value) {
+              context.pop();
+            });
+          },
+          child: const Text('Edit'),
+        ),
+      ],
     );
   }
 }

@@ -19,7 +19,7 @@ class User {
 
   User.fromSnapShot(DocumentSnapshot<Map<String, dynamic>> snapshot)
       : this.fromJson(snapshot.data());
-  
+
   Map<String, dynamic> toJson() {
     return {
       'userName': userName,
@@ -28,7 +28,6 @@ class User {
     };
   }
 }
-
 
 Future<int> createUser(User user) async {
   await FirebaseFirestore.instance

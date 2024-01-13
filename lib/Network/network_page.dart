@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mindnetwork/Network/network_edge.dart';
 import 'package:mindnetwork/Network/network_node.dart';
 import 'package:mindnetwork/Network/network_viewmodel.dart';
@@ -20,40 +21,62 @@ class _NetworkPageState extends ConsumerState<NetworkPage> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
+        title: const Text("NetworkPage"),
         backgroundColor: Colors.transparent,
       ),
       body: Stack(
         children: [
-          SizedBox(
-            height: size.height,
-            width: size.width,
-            child: const NetworkView(),
-          ),
-          const Positioned(
-            top: 20,
-            left: 20,
-            child: Text(
-              "Network Page",
-              style: TextStyle(
-                fontSize: 40,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
+          const NetworkView(),
           Positioned(
-            bottom: 30,
-            right: 30,
-            child: GestureDetector(
-              onTap: () {
-                provider.addNode(100, 100);
-              },
-              child: ClipOval(
-                child: Container(
-                  height: 50,
-                  width: 50,
-                  color: Colors.blue,
+            bottom: 0,
+            child: Container(
+              height: 80,
+              width: size.width,
+              color: Colors.white,
+              child: SingleChildScrollView(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 80,
+                      width: 80,
+                      padding: const EdgeInsets.all(10),
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          provider.addNode(100, 100);
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Text("Add Node"),
+                      ),
+                    ),
+                    Container(
+                      height: 80,
+                      width: 80,
+                      padding: const EdgeInsets.all(10),
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => const AlertDialog(
+                              title: Text("Network Saving ..."),
+                            ),
+                          );
+                          provider.updateNetwork().then((value) {
+                            context.pop();
+                          });
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Text(
+                          "Save Network",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -84,15 +107,14 @@ class _NetworkState extends ConsumerState<NetworkView> {
         width: 10000,
         color: Colors.red,
         child: Stack(
-          children: List.generate(
-              provider.edges.length + provider.nodes.length, (index) {
-                if (index < provider.edges.length){
-                  return NetworkEdge(index: index);
-                }
-                else{
-                  return NetworkNode(index: index - provider.edges.length);
-                }
-              }),
+          children: List.generate(provider.edges.length + provider.nodes.length,
+              (index) {
+            if (index < provider.edges.length) {
+              return NetworkEdge(index: index);
+            } else {
+              return NetworkNode(index: index - provider.edges.length);
+            }
+          }),
         ),
       ),
     );
